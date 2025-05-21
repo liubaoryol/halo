@@ -1,0 +1,21 @@
+name: RescueWorld-v0
+args: []
+size: 10
+n_targets: 3
+allow_variable_horizon: True
+fixed_targets: [ [0, 0], [9, 9], [4, 5] ]
+danger: null
+obstacles: null
+filter_state_until: -4
+kw_init_option_modelargs: {}
+obs_dim:  8
+action_dim: 4
+latent_dim: 3
+action_min: null
+action_max: null
+load_dir: /tmp/exp_local/2025.03.29/142956_libero_train
+
+dataset_fn:
+  _target_: dataloaders.trajectory_loader.get_rescue_world_data
+  data_directory: ${env_vars.datasets.rescue_world_n3}
+

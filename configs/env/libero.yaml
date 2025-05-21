@@ -1,0 +1,18 @@
+name: libero-goal-v0
+args: []
+kw_init_option_modelargs: {}
+obs_dim:  9
+action_dim: 7
+latent_dim: 10
+action_min: null
+action_max: null
+load_dir: /tmp/exp_local/2025.03.29/142956_libero_train
+workspace:
+  _target_: workspaces.libero_exec.LiberoWorkspace
+
+dataset_fn:
+  _target_: dataloaders.trajectory_loader.get_libero_train_val
+  data_directory: ${env_vars.datasets.libero_goal}
+  window_size: ${window_size}
+  use_image_data: False # Remember to change obs_dim when changing this
+

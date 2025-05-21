@@ -1,0 +1,7 @@
+datasets:
+  relay_kitchen: /home/liubove/Documents/my-packages/halo/datasets/kitchen
+  libero_goal: /home/liubove/Documents/my-packages/halo/datasets/libero
+  rescue_world_n2: /home/liubove/Documents/my-packages/halo/datasets/rescue_world_n2
+  rescue_world_n3: /home/liubove/Documents/my-packages/halo/datasets/rescue_world_n3
+  rescue_world_n6: /home/liubove/Documents/my-packages/halo/datasets/rescue_world_n6
+  

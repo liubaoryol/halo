@@ -1,0 +1,62 @@
+name: RescueWorld-v0
+args: []
+size: 10
+n_targets: 6
+allow_variable_horizon: True
+fixed_targets: [
+            [ 1, 1 ],
+            [ 7, 1 ],
+            [ 4, 6 ],
+            [ 5, 0 ],
+            [ 7, 3 ],
+            [ 6, 8 ],
+        ]
+'danger': [
+            [ 2, 0 ],
+            [ 1, 1 ],
+            [ 8, 2 ],
+            [ 7, 4 ],
+            [ 3, 7 ],
+            [ 4, 7 ],
+            [ 6, 7 ],
+        ]
+'obstacles': [
+            [ 0, 4 ],
+            [ 0, 5 ],
+            [ 1, 2 ],
+            [ 1, 5 ],
+            [ 1, 8 ],
+            [ 2, 3 ],
+            [ 2, 8 ],
+            [ 3, 1 ],
+            [ 3, 5 ],
+            [ 3, 6 ],
+            [ 4, 1 ],
+            [ 4, 2 ],
+            [ 4, 5 ],
+            [ 4, 8 ],
+            [ 5, 5 ],
+            [ 5, 8 ],
+            [ 6, 1 ],
+            [ 6, 2 ],
+            [ 6, 3 ],
+            [ 7, 0 ],
+            [ 7, 2 ],
+            [ 7, 6 ],
+            [ 7, 8 ],
+            [ 8, 8 ],
+            [ 9, 4 ],
+            [ 9, 5 ],
+        ]
+filter_state_until: -7
+kw_init_option_modelargs: {}
+obs_dim:  14
+action_dim: 4
+latent_dim: 6
+action_min: null
+action_max: null
+load_dir: /tmp/exp_local/2025.03.29/142956_libero_train
+
+dataset_fn:
+  _target_: dataloaders.trajectory_loader.get_rescue_world_data
+  data_directory: ${env_vars.datasets.rescue_world_n6}

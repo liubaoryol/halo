@@ -1,0 +1,31 @@
+name: kitchen-all-v0
+args: []
+kw_init_option_modelargs: {}
+obs_dim: 60
+action_dim: 9
+latent_dim: 7
+action_min: null
+action_max: null
+
+# BeT baseline
+# Sup
+# load_dir: "/home/liubove/Documents/my-packages/bet/exp_local/2025.03.10/182407_kitchen_train"
+# Uns
+# load_dir: "/home/liubove/Documents/my-packages/bet/exp_local/2025.03.10/182413_kitchen_train"
+# 20 percent
+# load_dir: "/home/liubove/Documents/my-packages/bet/exp_local/2025.03.10/182403_kitchen_train"
+# 10 percent
+# load_dir: "/home/liubove/Documents/my-packages/bet/exp_local/2025.03.10/193118_kitchen_train"
+
+# Iterative random
+# load_dir: "/home/liubove/Documents/my-packages/bet/exp_local/2025.03.10/214558_kitchen_train"
+# Entropy
+load_dir: "/home/liubove/Documents/my-packages/bet/exp_local/2025.03.10/182407_kitchen_train"
+workspace:
+  _target_: workspaces.adept_kitchen.AdeptKitchenWorkspace
+
+dataset_fn:
+  _target_: dataloaders.trajectory_loader.get_relay_kitchen_train_val
+  data_directory: ${env_vars.datasets.relay_kitchen}
+  window_size: ${window_size}
+  use_image_data: False # Franka kitchen doesn't have image data

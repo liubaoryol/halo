@@ -1,0 +1,50 @@
+defaults:
+  - _self_
+  - env: rescue_world_n6
+  - env_vars: env_vars
+
+lazy_init_models: False
+
+# Dataset details
+batch_size: 64
+num_workers: 16
+window_size: 10
+
+# Student
+student_type: unsupervised # latent_entropy_based, unsupervised, IterativeRandom, QueryCapLimit, Random
+query_freq: 3
+num_queries: 1
+randomst_query_percent: 0.2
+query_percentage_budget: 1
+
+# Training details
+num_training_epochs: 1
+data_parallel: False
+device: cpu
+optim: Adam
+
+lr: 1e-4
+weight_decay: 0.1
+betas:
+  - 0.9
+  - 0.95
+grad_norm_clip: 1.0
+seed: 42
+
+# Prior training details
+num_epochs: 3500
+num_policy_only_epochs: 60
+eval_every: 1
+save_every: 100
+
+# Wandb config
+project: rescue_world_n2
+
+hydra:
+  job:
+    override_dirname: ${experiment}
+  run:
+    dir: ./exp_local/${now:%Y.%m.%d}/${now:%H%M%S}_${experiment}
+  sweep:
+    dir: ./exp/${now:%Y.%m.%d}/${now:%H%M}_${experiment}
+    subdir: ${hydra.job.num}
