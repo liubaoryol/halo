@@ -3,7 +3,6 @@ import dataclasses
 import torch
 import numpy as np
 from scipy.stats import entropy
-from scipy.special import logsumexp
 
 from stable_baselines3.common.utils import obs_as_tensor
 from imitation.data.types import TrajectoryWithRew
@@ -43,7 +42,6 @@ class TrajectoryWithLatent(TrajectoryWithRew):
     The reward `rew[i]` at the i'th timestep is received after the
     agent has taken action `acts[i]`.
     """
-
     @classmethod
     def set_policy(cls, policy_lo, policy_hi):
         cls._policy_lo = policy_lo.policy
@@ -64,7 +62,6 @@ class TrajectoryWithLatent(TrajectoryWithRew):
                                ))
         object.__setattr__(self, '_latent', -np.ones(len(self.obs) + 1, dtype=int))
         object.__setattr__(self, '_N', len(self.obs))
-        object.__setattr__(self, '_device', 'cpu')
     
     @property
     def latent(self):
@@ -153,21 +150,14 @@ class TrajectoryWithLatent(TrajectoryWithRew):
             # Done special handling
             log_prob = log_opts[:, 1:] + log_acts
             log_prob = torch.concatenate([log_prob, last_log_opts.unsqueeze(0)])
-
-        log_prob = log_prob.detach().numpy()
-        forward_msg = np.zeros([self._N+1, 1, self.option_dim])
-
-        for j in range(1, self._N+1):
-            if self._is_latent_estimated[j]:    
-                forward_msg[j] = -np.inf
-                forward_msg[j][0][self._latent[j]] = 0
-            # if self._is_latent_estimated[j]:
-            #     forward_msg[j] = np.log(1e-300)
-            #     forward_msg[j][:, self._latent[j]] = 0
-            else:
-                forward_msg[j] = logsumexp(np.concatenate(
-                    [forward_msg[j-1]]*self.option_dim) + log_prob[j-1], axis=1) # or 1?
-        return forward_msg
+            forward_msg = torch.zeros([self._N+1, self.option_dim, self.option_dim])
+            for j in range(1, self._N+1):
+                if self._is_latent_estimated[j]:
+                    forward_msg[j] = np.log(1e-10)
+                    forward_msg[j][:, self._latent[j]] = 0
+                else:
+                    forward_msg[j] = forward_msg[j-1] + log_prob[j-1]
+        return forward_msg.detach().numpy()
 
     def backward(self):
         """Backward messages"""
@@ -177,24 +167,24 @@ class TrajectoryWithLatent(TrajectoryWithRew):
             log_opts = self._log_prob_option()  # demo_len x (ct_1+1) x ct
             # Special handling of last state:
             log_acts = log_acts.reshape([-1, 1, self.option_dim])
-            log_opts = log_opts[1:]
+            last_log_opts = log_opts[-1][1:]
+            log_opts = log_opts[:-1]
 
             # Done special handling
             log_prob = log_opts[:, 1:] + log_acts
-        
-        log_prob = log_prob.detach().numpy()
-        backward_msg = np.zeros([self._N+1, 1, self.option_dim])
-        for j in reversed(range(1, self._N)):
-            backward_msg[j] = logsumexp(np.concatenate(
-                [backward_msg[j-1]]*self.option_dim) + log_prob[j-1], axis=1)
-        return backward_msg
+            log_prob = torch.concatenate([log_prob, last_log_opts.unsqueeze(0)])
+            backward_msg = torch.zeros([self._N+1, self.option_dim, self.option_dim])
+            for j in reversed(range(1, self._N)):
+                if self._is_latent_estimated[j]:
+                    backward_msg[j] = np.log(1e-10)
+                    backward_msg[j][:, self._latent[j]] = 0
+                else:
+                    backward_msg[j] = backward_msg[j+1] + log_prob[j]
+        return backward_msg.detach().numpy()
 
     def entropy(self):
         res = self.forward() + self.backward()
-        normalizer = logsumexp(res, axis=-1)
-        normalizer = np.stack([normalizer]*self.option_dim, axis=-1)
-        res -= normalizer
-        return entropy(np.exp(res), axis=(1,2))
+        return entropy(res, axis=(1,2))
 
     def __eq__(self, other:TrajectoryWithRew):
         return (other.obs == self.obs and  

@@ -12,7 +12,7 @@ window_size: 10
 
 # Student
 student_type: unsupervised # latent_entropy_based, unsupervised, IterativeRandom, QueryCapLimit, Random
-query_freq: 3
+query_freq: 1
 num_queries: 1
 randomst_query_percent: 0.2
 query_percentage_budget: 1
@@ -23,12 +23,6 @@ data_parallel: False
 device: cpu
 optim: Adam
 
-lr: 1e-4
-weight_decay: 0.1
-betas:
-  - 0.9
-  - 0.95
-grad_norm_clip: 1.0
 seed: 42
 
 # Prior training details

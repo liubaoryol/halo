@@ -12,8 +12,8 @@ window_size: 10
 
 # Student
 student_type: unsupervised # latent_entropy_based, unsupervised, IterativeRandom, QueryCapLimit, Random
-query_freq: 3
-num_queries: 1
+query_freq: 1
+num_queries: 10
 randomst_query_percent: 0.2
 query_percentage_budget: 1
 
@@ -38,7 +38,8 @@ eval_every: 1
 save_every: 100
 
 # Wandb config
-project: rescue_world_n2
+project: rescue_world_n6
+experiment: rescue_world_n6
 
 hydra:
   job:

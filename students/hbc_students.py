@@ -15,8 +15,7 @@ from dataloaders.utils_hbc import augmentTrajectoryWithLatent, TrajectoryWithLat
 class QueryIdentifier:
     traj_num: int
     idx_query: int
-    previous_estimated: int
-    gt_latent_set: int
+
 
 @dataclasses.dataclass
 class Oracle:
@@ -93,9 +92,6 @@ class Oracle:
             np.std(returns_t)
         ))
 
-        return (np.mean(returns), np.std(returns)), (np.mean(returns_t), np.std(returns))
-
-
 @dataclasses.dataclass
 class CuriousPupil(ABC):
     oracle: Oracle
@@ -116,13 +112,8 @@ class CuriousPupil(ABC):
     def query_oracle(self, num_queries):
         raise NotImplementedError
 
-    def log_query(self, traj_num, idx_query):
-        demo = self.demos[traj_num]
-        prev_latent = demo.latent[idx_query].item()
-        option = self.oracle.query(traj_num, idx_query)
-        demo.set_true_latent(idx_query, option)
-        self.list_queries.append(QueryIdentifier(traj_num, idx_query,
-                                                 prev_latent, option))
+    def save_query(self, traj_num, idx_query):
+        self.list_queries.append(QueryIdentifier(traj_num, idx_query))
 
     def __str__(self):
         return f'Student(num_demos={len(self.demos)}, option_dim={self.option_dim})'
@@ -148,7 +139,9 @@ class Random(CuriousPupil):
         demo = self.demos[idx]
         for j in range(len(demo.obs)):
             if np.random.uniform() <= self.query_percent:
-                self.log_query(idx, j)
+                option = self.oracle.query(idx, j)
+                demo.set_true_latent(j, option)
+                self.save_query(idx, j)
 
 @dataclasses.dataclass
 class Querycaplimit(CuriousPupil):
@@ -169,7 +162,34 @@ class Querycaplimit(CuriousPupil):
         n = len(demo.obs)
         idxs = np.random.choice(range(n), size=min(self.query_demo_cap, n))
         for j in idxs:
-            self.log_query(idx, j)
+            option = self.oracle.query(idx, j)
+            demo.set_true_latent(j, option)
+            self.save_query(idx, j)
+
+
+@dataclasses.dataclass
+class EfficientStudent(CuriousPupil):
+    """Student that accesses all info, but stores only the
+    states at the change of the latent state"""
+    student_type: str = 'efficient'
+    single_query_only: bool = True
+
+    def query_oracle(self, num_queries=1):
+        for idx in range(len(self.demos)):
+            self._query_single_demo(idx)
+        self._num_queries += 1
+
+    def _query_single_demo(self, idx):
+        demo = self.demos[idx]
+
+        option_1 = self.oracle.query(idx, 0)
+        demo.set_true_latent(0, option_1)
+        for j in range(1, len(demo.obs)):
+            option = self.oracle.query(idx, j)
+            if option!=option_1:
+                demo.set_true_latent(j, option)
+                option_1=option
+                self.save_query(idx, j)
 
 
 @dataclasses.dataclass
@@ -193,7 +213,9 @@ class Iterativerandom(CuriousPupil):
         unlabeled_idxs = np.array(n)[~demo._is_latent_estimated[1:]]
         if unlabeled_idxs.size > 0:
             j = np.random.choice(unlabeled_idxs)
-            self.log_query(idx, j)
+            option = self.oracle.query(idx, j)
+            demo.set_true_latent(j, option)
+            self.save_query(idx, j)
         else:
             logging.warn("All latent states in demo have been queried")
 
@@ -213,35 +235,25 @@ class Latent_entropy_based(CuriousPupil):
         
         top_entropies = []
         top_entropies_idx = []
-
-        # idx = idx_traj = np.random.randint(len(self.demos))
-        # ent_idx, ent = self._get_info_single_demo(idx)
-        # top_entropy_idx = ent_idx
-        # top_entropies.append(ent)
-        # top_entropies_idx.append(ent_idx)
         for idx in range(len(self.demos)):
             ent_idx, ent = self._get_info_single_demo(idx)
             top_entropies.append(ent)
             top_entropies_idx.append(ent_idx)
-            idx += 1
-
-        top_entropies = np.array(top_entropies)
-        top_entropy = (top_entropies).max()
-        idxs = np.where(top_entropies == top_entropy)[0]
-        idx_traj = np.random.choice(idxs)
+        
+        idx_traj = np.argmax(top_entropies)
         top_entropy_idx = top_entropies_idx[idx_traj]
-        # idx_traj = np.argmax(top_entropies)
-        # top_entropy_idx = top_entropies_idx[idx_traj]
         if top_entropy_idx is not None:
-            self.log_query(idx_traj, top_entropy_idx)
+            option = self.oracle.query(idx_traj, top_entropy_idx)
+            demo = self.demos[idx_traj]
+            demo.set_true_latent(top_entropy_idx, option)
+            self.save_query(idx_traj, top_entropy_idx)
             self._num_queries += 1
 
     def _get_info_single_demo(self, idx):
         demo = self.demos[idx]
         entropy = demo.entropy()
-        top_entropy = entropy[1:].max()
-        idxs = np.where(entropy == top_entropy)[0]
-        top_entropy_idx = np.random.choice(idxs) - 1
+        top_entropy_idx = entropy[1:].argmax()
+        top_entropy = entropy[1+top_entropy_idx]
         return top_entropy_idx, top_entropy
 
 

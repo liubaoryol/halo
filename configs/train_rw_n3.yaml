@@ -38,8 +38,8 @@ eval_every: 1
 save_every: 100
 
 # Wandb config
-project: rescue_world_n2
-experiment: rescue_world_n2
+project: rescue_world_n3
+experiment: rescue_world_n3
 
 hydra:
   job:

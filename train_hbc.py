@@ -67,15 +67,15 @@ class Workspace:
         )
 
         # Create the model
-        self.final_hbc = HBC(
-            option_dim=cfg.env.n_targets,
-            device=cfg.device,
-            env=self.env,
-            work_dir=self.work_dir,
-            exp_identifier=self.wandb_run.name,
-            curious_student=self.student,
-            wandb_run=self.wandb_run
-            )
+        # self.final_hbc = HBC(
+        #     option_dim=cfg.env.n_targets,
+        #     device=cfg.device,
+        #     env=self.env,
+        #     work_dir=self.work_dir,
+        #     exp_identifier=self.wandb_run.name,
+        #     curious_student=self.student,
+        #     wandb_run=self.wandb_run
+        #     )
         self.hbc = HBC(
             option_dim=cfg.env.n_targets,
             device=cfg.device,
@@ -111,14 +111,14 @@ class Workspace:
                 budget_available = self.student._num_queries < self.query_budget
                 if not self.query_time%self.query_freq:
                     if budget_available:
-                        self.student.query_oracle()
+                        self.student.query_oracle(num_queries=self.cfg.num_queries)
             
-            self.hbc.train(log_interval=len(self.hbc.policy_lo._demo_data_loader))
+            self.hbc.train()
             if ((epoch + 1) % self.cfg.eval_every) == 0:
                 self.hbc.evaluator.evaluate_and_log(
                     model=self.hbc,
                     student=self.student,
-                    oracle=self.oracle,
+                    oracle=self.student.oracle,
                     epoch=epoch)
 
             if not epoch % self.cfg.save_every:

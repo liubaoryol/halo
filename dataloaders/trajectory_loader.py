@@ -68,7 +68,7 @@ class RelayKitchenTrajectoryDataset(TensorDataset):
         self.masks = masks
         self.device = device
         # available_opts
-        gt_options = self.gymnasium(observations)
+        gt_options = self._calculate_gt_options(observations)
         self.oracle = Oracle(true_options=gt_options)
         observations = observations[:,:,:obs_shape]
         

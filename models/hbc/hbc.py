@@ -59,7 +59,6 @@ class HBCLoggerPartial(bc.BCLogger):
         super().__init__(logger)
         self.part = 'lo' if lo else 'hi'
         self.wandb_run = wandb_run
-        self.epoch_num = 0
 
     def log_batch(
         self,
@@ -69,13 +68,12 @@ class HBCLoggerPartial(bc.BCLogger):
         training_metrics,
         rollout_stats,
     ):
-        # import pdb; pdb.set_trace()
         for k, v in training_metrics.__dict__.items():
             name = f"bc_{self.part}/{k}"
             value = float(v) if v is not None else None
             self._logger.record(name, value)
             if self.wandb_run is not None:
-                self.wandb_run.log({name: value}, step=self.epoch_num)
+                self.wandb_run.log({name: value})
 
 class HBCLogger:
     """Utility class to help logging information relevant to Behavior Cloning."""
@@ -106,16 +104,6 @@ class HBCLogger:
                 'hamming_train',
                 'hamming_test'
             ])
-        self._file_loc = {
-            0: 'images/zero.png',
-            1: 'images/one.png',
-            2: 'images/two.png',
-            3: 'images/three.png',
-            4: 'images/four.png',
-            5: 'images/five.png',
-            6: 'images/six.png',
-            7: 'images/seven.png'
-        }
 
     def reset_tensorboard_steps(self):
         self._tensorboard_step = 0
@@ -126,11 +114,10 @@ class HBCLogger:
         hamming_loss: int,
         hamming_loss_test: int
     ):
-        self._logger_lo.epoch_num = epoch_num
-        self._logger_hi.epoch_num = epoch_num
         self._logger.record("env/epoch", epoch_num)
         self._logger.record("env/hamming_loss_train", hamming_loss)
         self._logger.record("env/hamming_loss_test", hamming_loss_test)
+
         self._logger.dump(self._tensorboard_step)
         self._tensorboard_step += 1
 
@@ -204,28 +191,24 @@ class HBC:
             device=device
         )
         self.policy_hi._bc_logger = self._logger._logger_hi
-        self.evaluator = Evaluator(self._logger, self.env)
-
         TrajectoryWithLatent.set_policy(self.policy_lo, self.policy_hi)
-        transitions_lo, transitions_hi = self.transitions(self.curious_student.demos) 
-        self.policy_lo.set_demonstrations(transitions_lo)
-        self.policy_hi.set_demonstrations(transitions_hi)
 
-    def train(self, n_epochs=1, log_interval=500):
-        transitions_lo, transitions_hi = self.transitions(self.curious_student.demos) 
-
-        self.policy_lo.set_demonstrations(transitions_lo)
-        self.policy_lo.train(n_epochs=n_epochs, log_interval=log_interval)
+        self.evaluator = Evaluator(self._logger, self.env)
         
+
+    def train(self, n_epochs=1):
+        transitions_lo, transitions_hi = self.transitions(self.curious_student.demos) 
+        self.policy_lo.set_demonstrations(transitions_lo)
+        self.policy_lo.train(n_epochs=n_epochs)
         self.policy_hi.set_demonstrations(transitions_hi)
-        self.policy_hi.train(n_epochs=n_epochs, log_interval=log_interval)
+        self.policy_hi.train(n_epochs=n_epochs)
 
 
     def transitions(self, expert_demos):
         expert_lo = []
         expert_hi = []
         for demo in expert_demos:
-            opts = demo.latent # TODO
+            opts = demo.latent
             expert_lo.append(imitation.data.types.TrajectoryWithRew(
                 obs = np.concatenate([demo.obs, opts[1:]], axis=1),
                 acts = demo.acts,
