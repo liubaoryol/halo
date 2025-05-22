@@ -134,9 +134,9 @@ hbc = HBC(...)  # Load your trained model
 mean_return, std_return = evaluate_policy(hbc, env, n_eval_episodes=10)
 ```
 **Franka Kitchen**
-- In configs/env/relay_kitchen_traj.yaml, set load_dir to the absolute path of the directory containing the trained model.
-- Evaluation requires including the Relay Policy Learning repository in PYTHONPATH. `export PYTHONPATH=$PYTHONPATH:$(pwd)/relay-policy-learning/adept_envs`
-- `python3 run_on_env.py --config-name=eval_kitchen env.load_dir=$(pwd)/exp_remote/kitchen/2025.04.08/030424_kitchen_train`
+1. In configs/env/relay_kitchen_traj.yaml, set load_dir to the absolute path of the directory containing the trained model.
+2. Evaluation requires including the Relay Policy Learning repository in PYTHONPATH. `export PYTHONPATH=$PYTHONPATH:$(pwd)/relay-policy-learning/adept_envs`
+3. `python3 run_on_env.py --config-name=eval_kitchen env.load_dir=$(pwd)/exp_remote/kitchen/2025.04.08/030424_kitchen_train`
 
 To speed up evaluation, rendering can be disabled for the kitchen environment by setting the following in configs/eval_kitchen.yaml: `enable_render: False`
 #### LIBERO
