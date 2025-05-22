@@ -19,7 +19,7 @@ sudo apt update
 sudo apt install -y build-essential libgl1
 ```
 Then, clone the repository and set up the conda environment:
-```
+```bash
 git clone https://github.com/liubaoryol/halo.git
 cd halo
 
@@ -38,7 +38,7 @@ pip install torch wandb
 
 Install [LIBERO](https://github.com/Lifelong-Robot-Learning/LIBERO.git):
 
-```
+```bash
 git clone https://github.com/Lifelong-Robot-Learning/LIBERO.git
 cd LIBERO
 pip install -r requirements.txt
@@ -47,11 +47,11 @@ cd ..
 ```
 
 To enable logging with Weights & Biases (wandb), log in with a `wandb` account:
-```
+```bash
 wandb login
 ```
 To disable logging entirely (e.g. for offline use):
-```
+```bash
 export WANDB_MODE=disabled
 ```
 
@@ -100,77 +100,75 @@ wget https://osf.io/download/4g53p -O datasets/bet_data_release.tar.gz && tar -x
 ### 🧩 LIBERO Dataset
 
 To download the `libero_goal` dataset, use the author's code directly. For more detail refer to their 
-[github page](https://github.com/Lifelong-Robot-Learning/LIBERO or [project page](https://libero-project.github.io/datasets):
+[GitHub page](https://github.com/Lifelong-Robot-Learning/LIBERO) or [project page](https://libero-project.github.io/datasets):
 
 ```bash
 mkdir -p datasets/libero
 python benchmark_scripts/download_libero_datasets.py --datasets libero_goal --save_dir datasets/libero
 ```
 
-## Reproducing experiments
+## Training Commands
 
-The following assumes our current working directory is the root folder of this project repository.
+Training progress can be viewed in Weights & Biases (wandb).  Snapshots will be saved to a new timestamped directory `./exp_local/{date}/{time}_kitchen_train`
 
-To reproduce the experiment results, the overall steps are:
-1. Activate the conda environment with
-   ```
-   conda activate behavior-transformer
-   ```
-2. Train with `python3 train.py`. A model snapshot will be saved to `./exp_local/...`;
-  - use student_type arg to set student type.
-    student types are:
-    - latent_entropy_based
-    - iterative_random
-    - supervised
-    - unsupervised
-    - random
-3. In the corresponding environment config, set the `load_dir` to the absolute path of the snapshot directory above;
-4. Eval with `python3 run_on_env.py`.
+All commands have the same options, where you can choose `student_type` from 
+- halo
+- uniform
+- supervised
+- no_query
+For Rescue World, use `train_hbc.py`, which uses Hierarchical Behavioral Cloning.  
+For Franka Kitchen and LIBERO environments, use `train.py`, which uses Behavior Transformer.  
+We also release `train_compile.py` to compare with another algorithm of unsupervised learning of options based on CompILE: Compositional Imitation Learning and Execution ([paper](https://arxiv.org/abs/1812.01483)).
 
 
+### Rescue World
 
+```bash
+python3 train_hbc.py --config-name=train_rw_n2 student_type=halo seed=0 query_percentage_budget=0.3
+```
 
-See below for detailed steps for each environment.
+### Franka Kitchen
 
-### RW4T
-
-### Franka kitchen
-
-- Train:
-  ```
-  python3 train.py --config-name=train_kitchen seed=6 project=neurips2025_kitchen batch_size=64 student_type=latent_entropy_based query_percentage_budget=0.2
-  ```
-  Snapshots will be saved to a new timestamped directory `./exp_local/{date}/{time}_kitchen_train`
-- In `configs/env/relay_kitchen_traj.yaml`, set `load_dir` to the absolute path of the directory above.
-- Evaluation:
-  ```
-  export PYTHONPATH=$PYTHONPATH:$(pwd)/relay-policy-learning/adept_envs
-  python3 run_on_env.py --config-name=eval_kitchen env.load_dir=$(pwd)/exp_remote/kitchen/2025.04.08/030424_kitchen_train
-  2025.04.08/030341_kitchen_train
-  ```
-  (Evaluation requires including the relay policy learning repo in `PYTHONPATH`.)
-
-
-### Speeding up evaluation
-- Rendering can be disabled for the kitchen environment: set `enable_render: False` in `configs/eval_kitchen.yaml`
+```bash
+python3 train.py --config-name=train_kitchen seed=6 project=neurips2025_kitchen student_type=latent_entropy_based query_percentage_budget=0.2
+```
 
 ### LIBERO
-- Train:
-  ```
-  python3 train.py --config-name=train_libero student_type=latent_entropy_based seed=0 project=exp1 batch_size=64
-  ```
+```bash
+python3 train.py --config-name=train_libero student_type=latent_entropy_based seed=0 project=exp1
+```
+
+## Evaluation
+
+### Rescue World
+
+Our code has evaluation embedded, but the minimal example to evaluate this Gym environment is by using `stable_baselines3`.
+
+```python
+# TODO: fill in with actual evaluation code
+from evaluate import evaluate_policy
+from models.hbc import HBC
+
+hbc = HBC(...)  # Load your trained model
+mean_return, std_return = evaluate_policy(hbc, env, n_eval_episodes=10)
+```
+### Franka Kitchen
 - Evaluation:
-  ```
-  python3 run_on_env.py --config-name=eval_libero env.load_dir=/home/liubove/Documents/my-packages/bet/exp_local/2025.03.23/203929_libero_train
-  ```
+   - In configs/env/relay_kitchen_traj.yaml, set load_dir to the absolute path of the directory containing the trained model.
+   - Evaluation requires including the Relay Policy Learning repository in PYTHONPATH. `export PYTHONPATH=$PYTHONPATH:$(pwd)/relay-policy-learning/adept_envs`
+   - `python3 run_on_env.py --config-name=eval_kitchen env.load_dir=$(pwd)/exp_remote/kitchen/2025.04.08/030424_kitchen_train`
+
+#### Speeding Up Evaluation
+Rendering can be disabled for the kitchen environment by setting the following in configs/eval_kitchen.yaml: `enable_render: False`
+
+#### LIBERO
+` python3 run_on_env.py --config-name=eval_libero env.load_dir=$(pwd)/exp_local/2025.03.23/203929_libero_train`
 
 
 ## Acknowledgements
 
-- [notmahi/bet](https://github.com/notmahi/bet): 
-Code build on top of [Behavior Transformers (BET)](https://github.com/notmahi/bet) github to include expert querying. Besides BeT, also Behavioral Cloning model is used.
-Some code from to test Compile is also borrowed.
+- [notmahi/bet](https://github.com/notmahi/bet): for releasing behavior training transformers. HALO was buit by extending BeT to the hierarchical version.
+- [libero](https://github.com/Lifelong-Robot-Learning/LIBERO) for their dataset, which was essential to test query functions
+- [compile](https://arxiv.org/abs/1812.01483) for releasing the minimal code to implement compositional imitation learning.
+- [facebookresearch/hydra](https://github.com/facebookresearch/hydra): Used for flexible configuration management.
 
-- [facebookresearch/hydra](https://github.com/facebookresearch/hydra): Configuration managements.
-- [libero]()
-  
