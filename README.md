@@ -106,24 +106,14 @@ All commands have the same options, where you can choose `student_type` from
 - supervised
 - no_query
 
-
-For Rescue World, use `train_hbc.py`, which uses Hierarchical Behavioral Cloning.  
-For Franka Kitchen and LIBERO environments, use `train.py`, which uses Behavior Transformer.  
-We also release `train_compile.py` to compare with another algorithm of unsupervised learning of options based on CompILE: Compositional Imitation Learning and Execution ([paper](https://arxiv.org/abs/1812.01483)).
-
-**Rescue World**
-
 ```bash
+# Rescue World
 python3 train_hbc.py --config-name=train_rw_n2 student_type=halo seed=0 query_percentage_budget=0.3
-```
-**Franka Kitchen**
-```bash
+# Franka Kitchen
 python3 train.py --config-name=train_kitchen seed=6 project=neurips2025_kitchen student_type=latent_entropy_based query_percentage_budget=0.2
-```
-**LIBERO**
-```bash
+# LIBERO
 python3 train.py --config-name=train_libero student_type=latent_entropy_based seed=0 project=exp1
-```
+
 ## Evaluation
 **Rescue World**: Training script also performs evaluation, but here is a minimal example to evaluate HBC on rescue world gym environment
 ```python
