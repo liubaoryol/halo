@@ -105,6 +105,8 @@ All commands have the same options, where you can choose `student_type` from
 - uniform
 - supervised
 - no_query
+
+
 For Rescue World, use `train_hbc.py`, which uses Hierarchical Behavioral Cloning.  
 For Franka Kitchen and LIBERO environments, use `train.py`, which uses Behavior Transformer.  
 We also release `train_compile.py` to compare with another algorithm of unsupervised learning of options based on CompILE: Compositional Imitation Learning and Execution ([paper](https://arxiv.org/abs/1812.01483)).
