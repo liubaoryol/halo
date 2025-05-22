@@ -10,7 +10,7 @@ The following instructions assume the current working directory is the root of t
 
 ## Getting Started
 
-### 🔧 Project Setup
+### Project Setup
 
 First, install system dependencies:
 
@@ -68,11 +68,7 @@ sed -i "s|/home/liubove/Documents/my-packages/|$(pwd)/|g" configs/env_vars/env_v
 All datasets below will be saved in a `datasets/` folder created inside your current `halo` directory.
 
 
-### 🧭 Rescue-World Dataset
-
-This dataset contains three configurations with `n = 2, 3, 6` medical kits, as described in the paper. It can be found [here](https://osf.io/54xah/files/osfstorage)
-
-To download them via command line:
+🧭 **Rescue-World Dataset**: This dataset contains three configurations with `n = 2, 3, 6` medical kits, as described in the paper. It can be found [here](https://osf.io/54xah/files/osfstorage). To download them via command line:
 
 ```bash
 mkdir -p datasets
@@ -81,11 +77,9 @@ wget https://osf.io/a3t8y/download -O datasets/rescue_world_n2.tar.gz && tar -xz
 wget https://osf.io/y9z67/download -O datasets/rescue_world_n3.tar.gz && tar -xzvf datasets/rescue_world_n3.tar.gz -C datasets
 wget https://osf.io/92sg6/download -O datasets/rescue_world_n6.tar.gz && tar -xzvf datasets/rescue_world_n6.tar.gz -C datasets
 ```
+🤖 **Franka Kitchen Dataset**
 
-
-### 🤖 Franka Kitchen Dataset
-
-**MuJoCo 2.1.0** is only required for **evaluation**, as the training does not require interaction with environment (offline imitation learning)
+MuJoCo 2.1.0 is only required for evaluation, as the training does not require interaction with environment (offline imitation learning)
 
 - Install MuJoCo 2.1.0: [Installation Guide](https://github.com/openai/mujoco-py#install-mujoco)
 
@@ -95,12 +89,7 @@ Download the dataset:
 wget https://osf.io/download/4g53p -O datasets/bet_data_release.tar.gz && tar -xzvf datasets/bet_data_release.tar.gz -C datasets
 ```
 
-
-
-### 🧩 LIBERO Dataset
-
-To download the `libero_goal` dataset, use the author's code directly. For more detail refer to their 
-[GitHub page](https://github.com/Lifelong-Robot-Learning/LIBERO) or [project page](https://libero-project.github.io/datasets):
+🧩 **LIBERO Dataset**: To download the `libero_goal` dataset, use the author's code directly. For more detail refer to their [GitHub page](https://github.com/Lifelong-Robot-Learning/LIBERO) or [project page](https://libero-project.github.io/datasets):
 
 ```bash
 mkdir -p datasets/libero
@@ -120,47 +109,34 @@ For Rescue World, use `train_hbc.py`, which uses Hierarchical Behavioral Cloning
 For Franka Kitchen and LIBERO environments, use `train.py`, which uses Behavior Transformer.  
 We also release `train_compile.py` to compare with another algorithm of unsupervised learning of options based on CompILE: Compositional Imitation Learning and Execution ([paper](https://arxiv.org/abs/1812.01483)).
 
-
-### Rescue World
+**Rescue World**
 
 ```bash
 python3 train_hbc.py --config-name=train_rw_n2 student_type=halo seed=0 query_percentage_budget=0.3
 ```
-
-### Franka Kitchen
-
+**Franka Kitchen**
 ```bash
 python3 train.py --config-name=train_kitchen seed=6 project=neurips2025_kitchen student_type=latent_entropy_based query_percentage_budget=0.2
 ```
-
-### LIBERO
+**LIBERO**
 ```bash
 python3 train.py --config-name=train_libero student_type=latent_entropy_based seed=0 project=exp1
 ```
-
 ## Evaluation
-
-### Rescue World
-
-Our code has evaluation embedded, but the minimal example to evaluate this Gym environment is by using `stable_baselines3`.
-
+**Rescue World**: Training script also performs evaluation, but here is a minimal example to evaluate HBC on rescue world gym environment
 ```python
-# TODO: fill in with actual evaluation code
 from evaluate import evaluate_policy
 from models.hbc import HBC
 
 hbc = HBC(...)  # Load your trained model
 mean_return, std_return = evaluate_policy(hbc, env, n_eval_episodes=10)
 ```
-### Franka Kitchen
-- Evaluation:
-   - In configs/env/relay_kitchen_traj.yaml, set load_dir to the absolute path of the directory containing the trained model.
-   - Evaluation requires including the Relay Policy Learning repository in PYTHONPATH. `export PYTHONPATH=$PYTHONPATH:$(pwd)/relay-policy-learning/adept_envs`
-   - `python3 run_on_env.py --config-name=eval_kitchen env.load_dir=$(pwd)/exp_remote/kitchen/2025.04.08/030424_kitchen_train`
+**Franka Kitchen**
+- In configs/env/relay_kitchen_traj.yaml, set load_dir to the absolute path of the directory containing the trained model.
+- Evaluation requires including the Relay Policy Learning repository in PYTHONPATH. `export PYTHONPATH=$PYTHONPATH:$(pwd)/relay-policy-learning/adept_envs`
+- `python3 run_on_env.py --config-name=eval_kitchen env.load_dir=$(pwd)/exp_remote/kitchen/2025.04.08/030424_kitchen_train`
 
-#### Speeding Up Evaluation
-Rendering can be disabled for the kitchen environment by setting the following in configs/eval_kitchen.yaml: `enable_render: False`
-
+To speed up evaluation, rendering can be disabled for the kitchen environment by setting the following in configs/eval_kitchen.yaml: `enable_render: False`
 #### LIBERO
 ` python3 run_on_env.py --config-name=eval_libero env.load_dir=$(pwd)/exp_local/2025.03.23/203929_libero_train`
 
