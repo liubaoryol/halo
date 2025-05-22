@@ -1,8 +1,8 @@
 # Hierarchical Active Learning for Options (HALO) 
 Hierarchical Reinforcement Learning (HRL) enables solving complex, long-horizon tasks by decomposing them into meaningful subtasks or options.  While the benefits of hierarchical structures are well-established, extending these approaches to imitation learning introduces a key challenge: the need to annotate options in expert trajectories, substantially increasing the annotation burden. Current Hierarchical Imitation Learning (HIL) methods either rely on exhaustive option annotation or attempt unsupervised option discovery, which often fails to capture semantically meaningful decompositions. We introduce Hierarchical Active Learning of Options (HALO), an active imitation learning algorithm that efficiently learns hierarchical policies by strategically querying for option labels at the most informative timesteps. We provide theoretical bounds on query efficiency and demonstrate that HALO consistently outperforms both unsupervised option discovery methods and standard imitation learning, achieving comparable performance to fully supervised HIL with only a small fraction of option annotations. Experiments across grid environments and robotic manipulation tasks show that our method achieves superior task performance while learning interpretable option boundaries that align with semantic task structure.
 
-## Code release
-![status](https://img.shields.io/badge/status-beta-yellow)
+## ![status](https://img.shields.io/badge/status-beta-yellow) Code release
+
 
 This software can be used to replicate the experiments from the associated paper. However, it is still under active development, and future updates will improve standardization and readability.
 
