@@ -1,4 +1,6 @@
+import sys
 import os
+sys.path.append(os.getcwd())
 import wandb
 import gymnasium as gym
 from datetime import datetime
@@ -67,15 +69,15 @@ class Workspace:
         )
 
         # Create the model
-        # self.final_hbc = HBC(
-        #     option_dim=cfg.env.n_targets,
-        #     device=cfg.device,
-        #     env=self.env,
-        #     work_dir=self.work_dir,
-        #     exp_identifier=self.wandb_run.name,
-        #     curious_student=self.student,
-        #     wandb_run=self.wandb_run
-        #     )
+        self.final_hbc = HBC(
+            option_dim=cfg.env.n_targets,
+            device=cfg.device,
+            env=self.env,
+            work_dir=self.work_dir,
+            exp_identifier=self.wandb_run.name,
+            curious_student=self.student,
+            wandb_run=self.wandb_run
+            )
         self.hbc = HBC(
             option_dim=cfg.env.n_targets,
             device=cfg.device,
