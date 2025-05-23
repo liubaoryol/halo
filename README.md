@@ -62,7 +62,7 @@ After downloading the datasets, you need to update `configs/env_vars/env_vars.ya
 If you're following the setup as described here, following the command prompts, and you're in the `halo` directory, the following command will automatically update the paths:
 
 ```bash
-sed -i "s|/tmp/my-packages/|$(pwd)/|g" configs/env_vars/env_vars.yaml
+sed -i "s|/tmp/|$(pwd)/|g" configs/env_vars/env_vars.yaml
 ```
 
 All datasets below will be saved in a `datasets/` folder created inside your current `halo` directory.
