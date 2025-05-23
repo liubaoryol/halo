@@ -46,7 +46,6 @@ class Workspace:
         )
         horizon = cfg.env.size**2 * cfg.env.n_targets
         self.env.unwrapped._max_episode_steps = horizon
-        import pdb; pdb.set_trace()
         self.oracle = hydra.utils.call(cfg.env.dataset_fn)
         # Create student
         self.student = getattr(students, cfg.student_type.capitalize())(
