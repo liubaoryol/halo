@@ -7,20 +7,7 @@ latent_dim: 7
 action_min: null
 action_max: null
 
-# BeT baseline
-# Sup
-# load_dir: "/home/liubove/Documents/my-packages/bet/exp_local/2025.03.10/182407_kitchen_train"
-# Uns
-# load_dir: "/home/liubove/Documents/my-packages/bet/exp_local/2025.03.10/182413_kitchen_train"
-# 20 percent
-# load_dir: "/home/liubove/Documents/my-packages/bet/exp_local/2025.03.10/182403_kitchen_train"
-# 10 percent
-# load_dir: "/home/liubove/Documents/my-packages/bet/exp_local/2025.03.10/193118_kitchen_train"
-
-# Iterative random
-# load_dir: "/home/liubove/Documents/my-packages/bet/exp_local/2025.03.10/214558_kitchen_train"
-# Entropy
-load_dir: "/home/liubove/Documents/my-packages/bet/exp_local/2025.03.10/182407_kitchen_train"
+load_dir: "/tmp/exp_local/2025.03.10/182407_kitchen_train"
 workspace:
   _target_: workspaces.adept_kitchen.AdeptKitchenWorkspace
 

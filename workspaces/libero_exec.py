@@ -1,27 +1,13 @@
 import einops
-import gym
-import hydra
 import joblib
 import torch
-import umap
-import umap.plot
-import wandb
 import logging
-import pickle
-
-import utils
 import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
 
 from workspaces import base
 import envs
-# from dataloaders.libero_utils import set_sam_encoder
-
-
-# PREDICTOR = set_sam_encoder()
-# pca_agentview = pickle.load(open("/home/liubove/Documents/my-packages/bet/pca_agentview.pkl",'rb')) 
-# pca_eye_in_hand = pickle.load(open("/home/liubove/Documents/my-packages/bet/pca_eye_in_hand.pkl",'rb'))
 
 class LiberoWorkspace(base.Workspace):
     def _setup_plots(self):

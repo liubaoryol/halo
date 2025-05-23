@@ -13,7 +13,7 @@ from latent_active_learning.wrappers.latent_wrapper import FilterLatent
 
 EPS = 1e-17
 NEG_INF = -1e30
-HOME_DIR = '/home/liubove/Documents/my-packages/latent_active_learning/'
+HOME_DIR = '/home/redacted/Documents/my-packages/latent_active_learning/'
 
 
 def to_one_hot(indices, max_index):

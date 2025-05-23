@@ -134,7 +134,7 @@ class HBCLogger:
                 "env/epoch": epoch_num,
                 "env/hamming_loss": hamming_loss,
                 "env/hamming_loss_test": hamming_loss_test
-            }, step=epoch_num)
+            })
 
 
     def __getstate__(self):
